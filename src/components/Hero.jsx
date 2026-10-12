@@ -8,8 +8,8 @@ export default function Hero() {
       <div className="hero-grid">
         <div className="hero-main">
           <p className="hero-kicker boot boot-1">
-            <span className="blink">●</span> SOFTWARE ENGINEER — THIMPHU,
-            BHUTAN
+            <span className="blink">●</span> SOFTWARE ENGINEER — PERTH, WESTERN
+            AUSTRALIA
           </p>
           <h1 className="hero-name">
             <TypeLine text="BHUWAN" start={350} />
@@ -22,8 +22,8 @@ export default function Hero() {
           </h1>
           <p className="hero-blurb boot boot-4">
             I build <strong>enterprise platforms</strong> with React, Next.js,
-            Angular &amp; React Native — and lead the teams that ship them.
-            Tech lead at Selise Digital Platforms.
+            Angular &amp; React Native — and lead the teams that ship them. Tech
+            lead at Selise Digital Platforms.
           </p>
         </div>
         <AsciiPortrait />
