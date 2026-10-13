@@ -1,85 +1,127 @@
-import { PROJECTS } from "../constants";
-import Reveal from "./Reveal";
-import SectionHead from "./SectionHead";
+import { useEffect, useRef, useState } from "react";
+import { GITHUB, GITHUB_USER, PROJECTS } from "../constants";
+import Row from "./Row";
+import Section from "./Section";
+
+const sentence = (items) =>
+  `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+
+function Shot({ p }) {
+  return p.img ? (
+    <img src={p.img} alt={p.imgAlt} />
+  ) : (
+    <span className="sprites">
+      {p.shots.map((s) => (
+        <img key={s.src} src={s.src} alt={s.alt} />
+      ))}
+    </span>
+  );
+}
+
+/* a screenshot that trails the cursor while a project row is hovered */
+function usePreview() {
+  const ref = useRef(null);
+  const [active, setActive] = useState(null);
+  const target = useRef(null);
+  const pos = useRef(null);
+
+  useEffect(() => {
+    const onMove = (e) => {
+      target.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
+
+  // only animate while a row is hovered
+  useEffect(() => {
+    if (active === null || !target.current) return;
+    const el = ref.current;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!pos.current) pos.current = { ...target.current };
+    let raf;
+    const tick = () => {
+      const p = pos.current;
+      const ease = reduced.matches ? 1 : 0.2;
+      p.x += (target.current.x - p.x) * ease;
+      p.y += (target.current.y - p.y) * ease;
+      el.style.transform = `translate3d(${p.x + 28}px, ${p.y - 48}px, 0)`;
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, [active]);
+
+  return { ref, active, setActive };
+}
 
 export default function Projects() {
+  const { ref, active, setActive } = usePreview();
+
   return (
-    <section id="projects" className="section">
-      <SectionHead index="②" title="PROJECTS" />
-      <div className="proj-list">
+    <Section id="projects" title="Projects">
+      <ul className="rows">
         {PROJECTS.map((p) => (
-          <Reveal
-            as="article"
-            className={p.img || p.shots ? "proj proj-has-shot" : "proj"}
+          <Row
             key={p.n}
+            date={p.span}
+            title={p.name}
+            sub={p.tagline}
+            onPointerEnter={() => setActive(p.n)}
+            onPointerLeave={() => setActive(null)}
           >
-            <div className="proj-copy">
-              <div className="proj-head">
-                <span className="proj-n">{p.n}</span>
-                <div className="proj-title">
-                  <h3>{p.name}</h3>
-                  <p className="proj-tagline">{p.tagline}</p>
-                </div>
-                <div className="proj-meta">
-                  <span className="proj-tag">{p.tag}</span>
-                  <span className="proj-span">{p.span}</span>
-                </div>
-              </div>
-              <p className="proj-desc">{p.desc}</p>
-              <ul className="proj-points">
-                {p.points.map((pt, i) => (
-                  <li key={i}>{pt}</li>
-                ))}
-              </ul>
-              <div className="proj-foot">
-                <div className="chips">
-                  {p.stack.map((s) => (
-                    <span className="chip chip-light" key={s}>
-                      {s}
-                    </span>
-                  ))}
-                </div>
-                <div className="proj-links">
-                  <a
-                    className="btn btn-small"
-                    href={p.repo}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    VIEW CODE ↗
-                  </a>
-                  {p.site && (
-                    <a
-                      className="btn btn-small btn-ghost"
-                      href={p.site}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      VISIT SITE ↗
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-            {p.img && (
-              <figure className={p.imgWide ? "proj-shot proj-shot-wide" : "proj-shot"}>
-                <img src={p.img} alt={p.imgAlt} loading="lazy" />
-                <figcaption>{p.shotCaption}</figcaption>
-              </figure>
-            )}
-            {p.shots && (
-              <figure className="proj-shot proj-shot-strip">
-                <div className="shot-frames">
-                  {p.shots.map((s) => (
-                    <img key={s.src} src={s.src} alt={s.alt} loading="lazy" />
-                  ))}
-                </div>
-                <figcaption>{p.shotCaption}</figcaption>
-              </figure>
-            )}
-          </Reveal>
+            <figure className="inline-shot">
+              <Shot p={p} />
+            </figure>
+            <p>{p.desc}</p>
+            <ul className="points">
+              {p.points.map((pt, j) => (
+                <li key={j}>{pt}</li>
+              ))}
+            </ul>
+            <p className="meta">Built with {sentence(p.stack)}.</p>
+            <p className="links">
+              <a href={p.repo} target="_blank" rel="noreferrer">
+                Source
+              </a>
+              {p.site && (
+                <a href={p.site} target="_blank" rel="noreferrer">
+                  {p.site.replace(/^https?:\/\//, "")}
+                </a>
+              )}
+            </p>
+          </Row>
+        ))}
+      </ul>
+
+      <div
+        className={active ? "preview preview-on" : "preview"}
+        ref={ref}
+        aria-hidden="true"
+      >
+        {PROJECTS.map((p) => (
+          <figure
+            key={p.n}
+            className={active === p.n ? "preview-item on" : "preview-item"}
+          >
+            <Shot p={p} />
+          </figure>
         ))}
       </div>
-    </section>
+
+      <a
+        className="activity"
+        href={GITHUB}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          src={`https://ghchart.rshah.org/0f6b5c/${GITHUB_USER}`}
+          alt={`GitHub contribution graph for ${GITHUB_USER}`}
+          loading="lazy"
+        />
+        <span>Commits on GitHub, last twelve months</span>
+      </a>
+    </Section>
   );
 }
