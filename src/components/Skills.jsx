@@ -1,25 +1,19 @@
 import { SKILLS } from "../constants";
-import Reveal from "./Reveal";
-import SectionHead from "./SectionHead";
+import Chapter from "./Chapter";
+
+const label = (s) => s.charAt(0) + s.slice(1).toLowerCase();
 
 export default function Skills() {
   return (
-    <section id="skills" className="section section-dark">
-      <SectionHead index="③" title="STACK" />
-      <div className="skills-grid">
+    <Chapter id="stack" title="Stack">
+      <dl className="stack">
         {SKILLS.map((g) => (
-          <Reveal className="skill-block" key={g.label}>
-            <h3 className="skill-label">{g.label}</h3>
-            <div className="chips">
-              {g.items.map((s) => (
-                <span className="chip" key={s}>
-                  {s}
-                </span>
-              ))}
-            </div>
-          </Reveal>
+          <div className="stack-row" key={g.label}>
+            <dt>{label(g.label)}</dt>
+            <dd>{g.items.join(", ")}</dd>
+          </div>
         ))}
-      </div>
-    </section>
+      </dl>
+    </Chapter>
   );
 }

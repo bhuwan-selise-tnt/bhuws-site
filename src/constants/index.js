@@ -99,7 +99,7 @@ export const PROJECTS = [
     img: "/pokemart.png",
     imgAlt: "PokeMart BT — mobile-first Pokémon card catalog with cart",
     imgWide: true,
-    shotCaption: "↳ PUBLIC CATALOG — BROWSE & CART",
+    shotCaption: "The public catalogue: browse, filter, add to cart.",
   },
   {
     n: "02",
@@ -119,7 +119,7 @@ export const PROJECTS = [
     img: "/jobtally.png",
     imgAlt:
       "JobTally popup — tally-mark dashboard with per-site breakdown and recent applications",
-    shotCaption: "↳ EXTENSION POPUP — LIVE LEDGER",
+    shotCaption: "The popup ledger, tallied by site.",
   },
   {
     n: "03",
@@ -141,7 +141,7 @@ export const PROJECTS = [
       { src: "/mochi-happy.png", alt: "Mochi being petted, with a heart" },
       { src: "/mochi-sleep.png", alt: "Mochi sleeping with floating z's" },
     ],
-    shotCaption: "↳ VIBING · PETTED · ON BREAK",
+    shotCaption: "Idle, petted, and asleep in protest.",
   },
 ];
 

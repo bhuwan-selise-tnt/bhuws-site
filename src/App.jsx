@@ -1,4 +1,3 @@
-import Ticker from "./components/Ticker";
 import Topbar from "./components/Topbar";
 import Hero from "./components/Hero";
 import Experience from "./components/Experience";
@@ -11,7 +10,6 @@ import Footer from "./components/Footer";
 export default function App() {
   return (
     <>
-      <Ticker />
       <Topbar />
       <main id="top">
         <Hero />

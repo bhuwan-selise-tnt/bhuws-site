@@ -1,39 +1,30 @@
-import { AWARDS, EDUCATION, SPOKEN } from "../constants";
-import Reveal from "./Reveal";
-import SectionHead from "./SectionHead";
+import { AWARDS, EDUCATION } from "../constants";
+import Chapter from "./Chapter";
 
 export default function Education() {
   return (
-    <section id="education" className="section">
-      <SectionHead index="④" title="EDUCATION + HONOURS" />
-      <div className="edu-grid">
-        <Reveal className="edu-col">
-          <h3 className="col-label">SCHOOLING</h3>
+    <Chapter id="education" title="Education & honours">
+      <div className="edu">
+        <ol className="schools">
           {EDUCATION.map((e) => (
-            <div className="edu-item" key={e.school}>
-              <span className="edu-span">{e.span}</span>
-              <h4>{e.school}</h4>
-              <p>{e.deg}</p>
-            </div>
+            <li key={e.school}>
+              <span className="job-span">{e.span.replace("—", "–")}</span>
+              <div>
+                <h3 className="school">{e.school}</h3>
+                <p className="degree">{e.deg}</p>
+              </div>
+            </li>
           ))}
-        </Reveal>
-        <Reveal className="edu-col">
-          <h3 className="col-label">AWARDS</h3>
-          <ul className="award-list">
+        </ol>
+        <div>
+          <h3 className="edu-sub">Honours</h3>
+          <ul className="honours">
             {AWARDS.map((a) => (
               <li key={a}>{a}</li>
             ))}
           </ul>
-          <h3 className="col-label col-label-gap">SPEAKS</h3>
-          <div className="chips">
-            {SPOKEN.map((l) => (
-              <span className="chip chip-light" key={l}>
-                {l}
-              </span>
-            ))}
-          </div>
-        </Reveal>
+        </div>
       </div>
-    </section>
+    </Chapter>
   );
 }

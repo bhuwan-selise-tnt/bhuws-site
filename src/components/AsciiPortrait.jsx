@@ -4,15 +4,14 @@ import { PORTRAIT } from "../constants/portrait";
 /* character-particle field: every glyph has a home cell; the pointer
    repels nearby glyphs and a spring eases them back. */
 const FS = 8; // font size (px)
-const CW = FS * 0.6; // space mono advance width
+const CW = FS * 0.6; // cell width — glyphs sit in a fixed grid, not their advance
 const LH = FS; // line height
 const PAD = 2; // glyph bleed around the cell
 const RADIUS = 60; // pointer repulsion radius
 const PUSH = 2.1;
 const SPRING = 0.055;
 const FRICTION = 0.86;
-const BRIGHT = "#17a98f";
-const DIM = "rgba(23, 169, 143, 0.28)";
+const INTRO_SCATTER = 0.45; // initial spread, as a fraction of the plate size
 
 export default function AsciiPortrait() {
   const canvasRef = useRef(null);
@@ -36,6 +35,17 @@ export default function AsciiPortrait() {
     canvas.style.height = `${cssH}px`;
     ctx.scale(dpr, dpr);
 
+    // ink colours come from CSS tokens so the plate follows the theme
+    let BRIGHT, DIM;
+    const readColors = () => {
+      const cs = getComputedStyle(canvas);
+      BRIGHT = cs.getPropertyValue("--portrait-ink").trim();
+      DIM = cs.getPropertyValue("--portrait-dim").trim();
+    };
+    readColors();
+
+    // on load the glyphs start scattered and spring home: the ink settling
+    const scatter = (span) => (reduced ? 0 : (Math.random() - 0.5) * span);
     const particles = [];
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < lines[r].length; c++) {
@@ -43,8 +53,8 @@ export default function AsciiPortrait() {
         particles.push({
           ch,
           dim: ch === ".",
-          x: c * CW,
-          y: r * LH,
+          x: c * CW + scatter(cssW * INTRO_SCATTER),
+          y: r * LH + scatter(cssH * INTRO_SCATTER),
           hx: c * CW,
           hy: r * LH,
           vx: 0,
@@ -64,7 +74,7 @@ export default function AsciiPortrait() {
         g.height = (LH + PAD * 2) * dpr;
         const gc = g.getContext("2d");
         gc.scale(dpr, dpr);
-        gc.font = `700 ${FS}px "Space Mono", monospace`;
+        gc.font = `600 ${FS}px Newsreader, Georgia, serif`;
         gc.textBaseline = "top";
         gc.fillStyle = color;
         gc.fillText(ch, PAD, PAD);
@@ -125,11 +135,19 @@ export default function AsciiPortrait() {
       wake();
     };
 
-    draw(); // initial paint (settles immediately)
+    // wait for the webfont so the intro is drawn in the real face
     document.fonts.ready.then(() => {
-      glyphs.clear(); // re-rasterize once the real webfont is in
-      draw();
+      glyphs.clear();
+      wake();
     });
+
+    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
+    const onScheme = () => {
+      readColors();
+      glyphs.clear();
+      wake();
+    };
+    scheme.addEventListener("change", onScheme);
 
     if (!reduced) {
       canvas.addEventListener("pointermove", onMove);
@@ -139,17 +157,18 @@ export default function AsciiPortrait() {
       if (raf !== null) cancelAnimationFrame(raf);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerleave", onLeave);
+      scheme.removeEventListener("change", onScheme);
     };
   }, []);
 
   return (
-    <div
-      className="hero-portrait boot boot-5"
-      role="img"
-      aria-label="ASCII art portrait of Bhuwan, generated from a photo"
-    >
-      {/* <span className="hero-portrait-label">ME.TXT — 4,550 CHARS</span> */}
-      <canvas ref={canvasRef} aria-hidden="true" />
-    </div>
+    <figure className="frontispiece">
+      <canvas
+        ref={canvasRef}
+        role="img"
+        aria-label="Portrait of Bhuwan drawn in text characters, generated from a photo"
+      />
+      <figcaption>Self-portrait, set in type. Run your cursor through it.</figcaption>
+    </figure>
   );
 }
