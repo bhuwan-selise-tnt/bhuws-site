@@ -215,6 +215,6 @@ export const AWARDS = [
 export const SPOKEN = ["English", "Nepali", "Hindi", "Dzongkha"];
 
 export const EMAIL = "bhuws.dev@gmail.com";
-export const GITHUB = "https://github.com/bhuwan-selise-tnt";
-export const GITHUB_USER = "bhuwan-selise-tnt";
+export const GITHUB = "https://github.com/bhuws";
+export const GITHUB_USER = "bhuws";
 export const LINKEDIN = "https://www.linkedin.com/in/bhuwan-sharma-37b5bb187/";
