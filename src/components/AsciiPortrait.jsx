@@ -3,18 +3,17 @@ import { PORTRAIT } from "../constants/portrait";
 
 /* character-particle field: every glyph has a home cell; the pointer
    repels nearby glyphs and a spring eases them back. */
-const FS = 8; // font size (px)
-const CW = FS * 0.6; // space mono advance width
-const LH = FS; // line height
 const PAD = 2; // glyph bleed around the cell
-const RADIUS = 60; // pointer repulsion radius
 const PUSH = 2.1;
 const SPRING = 0.055;
 const FRICTION = 0.86;
-const BRIGHT = "#17a98f";
-const DIM = "rgba(23, 169, 143, 0.28)";
 
-export default function AsciiPortrait() {
+export default function AsciiPortrait({ size = 8 }) {
+  const FS = size; // font size (px)
+  const CW = FS * 0.6; // cell width — glyphs sit in a fixed grid
+  const LH = FS; // line height
+  const RADIUS = FS * 7.5; // pointer repulsion radius
+
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -35,6 +34,15 @@ export default function AsciiPortrait() {
     canvas.style.width = `${cssW}px`;
     canvas.style.height = `${cssH}px`;
     ctx.scale(dpr, dpr);
+
+    // ink colours come from CSS tokens so the portrait follows the theme
+    let BRIGHT, DIM;
+    const readColors = () => {
+      const cs = getComputedStyle(canvas);
+      BRIGHT = cs.getPropertyValue("--portrait-ink").trim();
+      DIM = cs.getPropertyValue("--portrait-dim").trim();
+    };
+    readColors();
 
     const particles = [];
     for (let r = 0; r < rows; r++) {
@@ -64,7 +72,7 @@ export default function AsciiPortrait() {
         g.height = (LH + PAD * 2) * dpr;
         const gc = g.getContext("2d");
         gc.scale(dpr, dpr);
-        gc.font = `700 ${FS}px "Space Mono", monospace`;
+        gc.font = `700 ${FS}px "Host Grotesk", system-ui, sans-serif`;
         gc.textBaseline = "top";
         gc.fillStyle = color;
         gc.fillText(ch, PAD, PAD);
@@ -131,6 +139,14 @@ export default function AsciiPortrait() {
       draw();
     });
 
+    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
+    const onScheme = () => {
+      readColors();
+      glyphs.clear();
+      draw();
+    };
+    scheme.addEventListener("change", onScheme);
+
     if (!reduced) {
       canvas.addEventListener("pointermove", onMove);
       canvas.addEventListener("pointerleave", onLeave);
@@ -139,17 +155,16 @@ export default function AsciiPortrait() {
       if (raf !== null) cancelAnimationFrame(raf);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerleave", onLeave);
+      scheme.removeEventListener("change", onScheme);
     };
-  }, []);
+  }, [FS, CW, LH, RADIUS]);
 
   return (
-    <div
-      className="hero-portrait boot boot-5"
+    <canvas
+      className="portrait"
+      ref={canvasRef}
       role="img"
-      aria-label="ASCII art portrait of Bhuwan, generated from a photo"
-    >
-      {/* <span className="hero-portrait-label">ME.TXT — 4,550 CHARS</span> */}
-      <canvas ref={canvasRef} aria-hidden="true" />
-    </div>
+      aria-label="Portrait of Bhuwan drawn in text characters, generated from a photo"
+    />
   );
 }
